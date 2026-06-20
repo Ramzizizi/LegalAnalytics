@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Выбор шаблона — Конструктор документов{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'documents:index' %}">Главная</a></li>
+        <li class="breadcrumb-item active">Новый документ</li>
+    </ol>
+</nav>
+
+<h3 class="mb-4">Выберите шаблон документа</h3>
+
+{% if шаблоны %}
+<div class="row g-3">
+    {% for шаблон in шаблоны %}
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">{{ шаблон.название }}</h5>
+                <span class="badge bg-secondary mb-2">{{ шаблон.get_тип_display }}</span>
+                {% if шаблон.описание %}
+                <p class="card-text text-muted small">{{ шаблон.описание }}</p>
+                {% endif %}
+                <p class="card-text small text-muted">
+                    Полей: {{ шаблон.кол_во_полей }}
+                </p>
+            </div>
+            <div class="card-footer bg-transparent">
+                <a href="{% url 'documents:create' шаблон.pk %}" class="btn btn-primary w-100">
+                    <i class="bi bi-pencil-square"></i> Заполнить
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">
+    Шаблоны документов ещё не добавлены.
+    {% if user.is_staff %}
+    <a href="{% url 'admin:templates_engine_шаблондокумента_add' %}">Добавить шаблон</a> в админке.
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Журнал документов — Конструктор документов{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Журнал документов</h3>
+    <a href="{% url 'documents:select_template' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Создать документ
+    </a>
+</div>
+
+{# ─── Фильтры ─── #}
+<form id="filter-form" method="get" action="{% url 'documents:journal' %}">
+    <div class="card mb-3 border-0 bg-light">
+        <div class="card-body py-2">
+            <div class="row g-2 align-items-end">
+
+                <div class="col-md-4">
+                    <label class="form-label small mb-1">Поиск</label>
+                    <input type="text" name="q" value="{{ q }}"
+                           class="form-control form-control-sm"
+                           placeholder="Шаблон или контрагент…"
+                           hx-get="{% url 'documents:journal' %}"
+                           hx-trigger="input changed delay:400ms"
+                           hx-target="#journal-body"
+                           hx-include="#filter-form">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Тип</label>
+                    <select name="тип" class="form-select form-select-sm"
+                            hx-get="{% url 'documents:journal' %}"
+                            hx-trigger="change"
+                            hx-target="#journal-body"
+                            hx-include="#filter-form">
+                        <option value="">Все типы</option>
+                        {% for val, label in типы %}
+                        <option value="{{ val }}" {% if тип == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Статус</label>
+                    <select name="статус" class="form-select form-select-sm"
+                            hx-get="{% url 'documents:journal' %}"
+                            hx-trigger="change"
+                            hx-target="#journal-body"
+                            hx-include="#filter-form">
+                        <option value="">Все статусы</option>
+                        {% for val, label in статусы %}
+                        <option value="{{ val }}" {% if статус == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Дата с</label>
+                    <input type="date" name="дата_с" value="{{ дата_с }}"
+                           class="form-control form-control-sm"
+                           hx-get="{% url 'documents:journal' %}"
+                           hx-trigger="change"
+                           hx-target="#journal-body"
+                           hx-include="#filter-form">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Дата по</label>
+                    <input type="date" name="дата_по" value="{{ дата_по }}"
+                           class="form-control form-control-sm"
+                           hx-get="{% url 'documents:journal' %}"
+                           hx-trigger="change"
+                           hx-target="#journal-body"
+                           hx-include="#filter-form">
+                </div>
+
+            </div>
+        </div>
+    </div>
+</form>
+
+{# ─── Таблица ─── #}
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Документ</th>
+                <th>Контрагент</th>
+                <th>Дата</th>
+                <th>Статус</th>
+                <th class="text-center">Скачать</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="journal-body">
+            {% include "documents/_journal_rows.html" %}
+        </tbody>
+    </table>
+</div>
+
+{# ─── Пагинация (только при обычной загрузке) ─── #}
+{% if docs.has_other_pages %}
+<nav>
+    <ul class="pagination pagination-sm justify-content-center">
+        {% if docs.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ docs.previous_page_number }}&q={{ q }}&тип={{ тип }}&статус={{ статус }}&дата_с={{ дата_с }}&дата_по={{ дата_по }}">«</a>
+        </li>
+        {% endif %}
+
+        {% for num in docs.paginator.page_range %}
+            {% if docs.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > docs.number|add:"-3" and num < docs.number|add:"3" %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}&q={{ q }}&тип={{ тип }}&статус={{ статус }}&дата_с={{ дата_с }}&дата_по={{ дата_по }}">{{ num }}</a>
+            </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if docs.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ docs.next_page_number }}&q={{ q }}&тип={{ тип }}&статус={{ статус }}&дата_с={{ дата_с }}&дата_по={{ дата_по }}">»</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

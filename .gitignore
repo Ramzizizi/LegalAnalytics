@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Django
+*.sqlite3
+/staticfiles/
+/media/
+/db.sqlite3
+
+# Сгенерированные документы
+/word_templates/generated/
+
+# Секреты
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Docker
+.dockerignore
+
+# macOS
+.DS_Store

@@ -1,0 +1,60 @@
+{% if docs %}
+    {% for doc in docs %}
+    <tr>
+        <td>
+            <a href="{% url 'documents:detail' doc.pk %}" class="text-decoration-none fw-semibold">
+                {{ doc.шаблон.название }}
+            </a>
+            <div class="text-muted small">{{ doc.шаблон.get_тип_display }}</div>
+        </td>
+        <td>
+            <div>{{ doc.контрагент.наименование }}</div>
+            <div class="text-muted small">ИНН {{ doc.контрагент.инн }}</div>
+        </td>
+        <td class="text-nowrap">{{ doc.создан|date:"d.m.Y" }}<br>
+            <span class="text-muted small">{{ doc.создан|date:"H:i" }}</span>
+        </td>
+        <td>
+            {% if doc.статус == 'готов' %}
+                <span class="badge bg-success">Готов</span>
+            {% elif doc.статус == 'ошибка' %}
+                <span class="badge bg-danger" title="{{ doc.ошибка }}">Ошибка</span>
+            {% else %}
+                <span class="badge bg-secondary">Черновик</span>
+            {% endif %}
+        </td>
+        <td class="text-center text-nowrap">
+            {% if doc.файл_docx %}
+            <a href="{% url 'documents:download' doc.pk 'docx' %}"
+               class="btn btn-sm btn-outline-primary me-1"
+               title="Скачать .docx">
+                <i class="bi bi-file-earmark-word"></i>
+            </a>
+            {% endif %}
+            {% if doc.файл_pdf %}
+            <a href="{% url 'documents:download' doc.pk 'pdf' %}"
+               class="btn btn-sm btn-outline-danger"
+               title="Скачать .pdf">
+                <i class="bi bi-file-earmark-pdf"></i>
+            </a>
+            {% endif %}
+            {% if not doc.файл_docx and not doc.файл_pdf %}
+            <span class="text-muted small">—</span>
+            {% endif %}
+        </td>
+        <td>
+            <a href="{% url 'documents:detail' doc.pk %}"
+               class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-eye"></i>
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+{% else %}
+    <tr>
+        <td colspan="6" class="text-center text-muted py-4">
+            <i class="bi bi-inbox display-6 d-block mb-2"></i>
+            Документов не найдено
+        </td>
+    </tr>
+{% endif %}
