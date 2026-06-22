@@ -25,6 +25,22 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'search:search' %}"><i class="bi bi-search"></i> Поиск</a>
                 </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        <i class="bi bi-journals"></i> База
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'knowledge:norm_list' %}">
+                            <i class="bi bi-file-text text-primary me-1"></i> Нормы права
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'knowledge:case_list' %}">
+                            <i class="bi bi-bank text-success me-1"></i> Судебная практика
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'knowledge:opinion_list' %}">
+                            <i class="bi bi-journal-check text-warning me-1"></i> Заключения
+                        </a></li>
+                    </ul>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'builder:home' %}"><i class="bi bi-file-earmark-text"></i> Конструктор</a>
                 </li>
