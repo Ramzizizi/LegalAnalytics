@@ -1,23 +1,66 @@
 import json
 from pathlib import Path
-from django.core.management.base import BaseCommand
+
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
+from django.core.management.base import BaseCommand
+
+from apps.accounts.roles import ALL_ROLES, ROLE_EDITOR, ROLE_ANALYST, ROLE_READER
 from apps.catalog.models import LegalBranch
 from apps.knowledge.models import Norm, CourtCase, LegalOpinion
 
 DATA_DIR = Path(__file__).resolve().parents[4] / 'data'
 User = get_user_model()
 
+DEMO_USERS = [
+    {'username': 'editor',  'password': 'editor123',  'full_name': 'Редактор Базы',   'role': ROLE_EDITOR},
+    {'username': 'analyst', 'password': 'analyst123', 'full_name': 'Аналитик Иванов', 'role': ROLE_ANALYST},
+    {'username': 'reader',  'password': 'reader123',  'full_name': 'Читатель Петров',  'role': ROLE_READER},
+]
+
 
 class Command(BaseCommand):
     help = 'Загрузить демо-данные в базу (идемпотентно)'
 
     def handle(self, *args, **options):
+        self._setup_groups()
+        self._setup_demo_users()
         self._load_branches()
         self._load_norms()
         self._load_cases()
         self._load_opinions()
         self.stdout.write(self.style.SUCCESS('Демо-данные загружены.'))
+
+    # ── Группы ────────────────────────────────────────────────────────────────
+
+    def _setup_groups(self):
+        for name in ALL_ROLES:
+            Group.objects.get_or_create(name=name)
+        self.stdout.write(f'  Группы: {", ".join(ALL_ROLES)}')
+
+    # ── Demo-пользователи ─────────────────────────────────────────────────────
+
+    def _setup_demo_users(self):
+        created = 0
+        for spec in DEMO_USERS:
+            first, _, last = spec['full_name'].partition(' ')
+            user, is_new = User.objects.get_or_create(
+                username=spec['username'],
+                defaults={
+                    'first_name': first,
+                    'last_name': last,
+                    'is_active': True,
+                },
+            )
+            if is_new:
+                user.set_password(spec['password'])
+                user.save()
+                created += 1
+            group = Group.objects.get(name=spec['role'])
+            user.groups.add(group)
+        self.stdout.write(f'  Пользователи: создано {created}, обновлено {len(DEMO_USERS) - created}')
+
+    # ── Контент ───────────────────────────────────────────────────────────────
 
     def _load_branches(self):
         data = self._read('branches.json')
@@ -76,14 +119,15 @@ class Command(BaseCommand):
 
     def _load_opinions(self):
         data = self._read('opinions.json')
-        user = User.objects.filter(is_superuser=True).first()
+        author = User.objects.filter(username='editor').first() \
+            or User.objects.filter(is_superuser=True).first()
         count = 0
         for item in data:
             opinion, created = LegalOpinion.objects.update_or_create(
                 title=item['title'],
                 defaults={
                     'text': item['text'],
-                    'author': user,
+                    'author': author,
                     'is_public': item.get('is_public', False),
                 },
             )

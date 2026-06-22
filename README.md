@@ -9,7 +9,7 @@
 - **Backend:** Django 5.1, Python 3.12, PostgreSQL 16
 - **Поиск:** PostgreSQL FTS (русский словарь, GIN-индекс, SearchRank)
 - **Frontend:** Bootstrap 5, HTMX, Chart.js, vis-network
-- **Прочее:** django-taggit, django-filter, docxtpl, WhiteNoise, Docker Compose
+- **Прочее:** django-taggit, django-filter, python-docx, WhiteNoise, Docker Compose
 
 ## Быстрый старт
 
@@ -27,8 +27,27 @@ docker compose up --build
 
 При первом запуске автоматически:
 - применяются миграции
+- создаётся суперпользователь (из `DJANGO_SUPERUSER_*` в `.env`)
 - загружаются демо-данные (`python manage.py load_legal_data`)
+- создаются 3 группы и 3 demo-пользователя
 - собирается статика
+
+## Demo-пользователи
+
+| Логин | Пароль | Роль | Возможности |
+|---|---|---|---|
+| `admin` | `admin123` | Суперпользователь | Всё + администрирование |
+| `editor` | `editor123` | Редактор базы | Всё, включая добавление/правку |
+| `analyst` | `analyst123` | Аналитик | Поиск, конструктор, дашборд |
+| `reader` | `reader123` | Читатель | Поиск и просмотр |
+
+## Роли
+
+| Роль | Поиск и просмотр | Конструктор .docx | Дашборд | Редактирование базы |
+|---|:---:|:---:|:---:|:---:|
+| Читатель | ✓ | — | — | — |
+| Аналитик | ✓ | ✓ | ✓ | — |
+| Редактор базы | ✓ | ✓ | ✓ | ✓ |
 
 ## Структура проекта
 
@@ -39,32 +58,30 @@ apps/
   search/     — полнотекстовый и фасетный поиск
   builder/    — конструктор правового заключения (.docx экспорт)
   analytics/  — дашборд (Chart.js)
-  accounts/   — аутентификация, роли
+  accounts/   — аутентификация, 3 роли (Groups)
 data/         — JSON-файлы с контентом для load_legal_data
-word_templates/ — .docx шаблон заключения
-tests/        — pytest-тесты
+fixtures/     — initial_groups.json для loaddata
+tests/        — pytest-тесты (57 passed)
 ```
 
-## Роли
+## Контент базы
 
-| Роль | Возможности |
-|---|---|
-| Редактор базы | Добавление/редактирование норм, практики, тегов |
-| Аналитик | Поиск, построение заключений, дашборд |
-| Читатель | Поиск и просмотр |
+- **10** отраслей права
+- **28** норм (ГК, ТК, СК, НК, КоАП, ЖК, ЗК, УК, АПК, ГПК, ФЗ)
+- **17** судебных решений с привязкой к нормам
+- **8** правовых заключений с привязкой к нормам и практике
 
 ## Разработка (без Docker)
 
 ```bash
 pip install -r requirements.txt
 
-# SQLite для локальной отладки
 export DATABASE_URL=sqlite:///db.sqlite3
 export SECRET_KEY=dev-key
 export DEBUG=True
 
 python manage.py migrate
-python manage.py createsuperuser
+python manage.py load_legal_data
 python manage.py runserver
 ```
 
@@ -72,6 +89,7 @@ python manage.py runserver
 
 ```bash
 pytest
+# 57 passed, 6 skipped (FTS-тесты требуют PostgreSQL)
 ```
 
 ## Этапы реализации
@@ -85,4 +103,4 @@ pytest
 - [x] Этап 7: Конструктор заключений (сессионная корзина, форма, .docx экспорт)
 - [x] Этап 8: Дашборд аналитики (Chart.js: 4 графика, KPI-карточки)
 - [x] Этап 9: Роли и доступ (3 группы Django, декораторы, профиль, 403)
-- [ ] Этап 10: Стабилизация + fixtures
+- [x] Этап 10: Стабилизация + fixtures (demo-пользователи, initial_groups, финальные тесты)

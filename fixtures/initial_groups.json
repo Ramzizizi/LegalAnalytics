@@ -1,0 +1,5 @@
+[
+  {"model": "auth.group", "pk": 1, "fields": {"name": "Редактор базы", "permissions": []}},
+  {"model": "auth.group", "pk": 2, "fields": {"name": "Аналитик",     "permissions": []}},
+  {"model": "auth.group", "pk": 3, "fields": {"name": "Читатель",      "permissions": []}}
+]
