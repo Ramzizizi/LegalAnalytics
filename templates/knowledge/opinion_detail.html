@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ opinion.title }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 860px;">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'catalog:home' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'search:search' %}">Поиск</a></li>
+            <li class="breadcrumb-item active">Заключение</li>
+        </ol>
+    </nav>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <span class="badge bg-warning text-dark mb-2">Правовое заключение</span>
+            <h1 class="h4">{{ opinion.title }}</h1>
+            {% if opinion.author %}
+            <p class="text-muted mb-1"><strong>Автор:</strong> {{ opinion.author.get_full_name|default:opinion.author.username }}</p>
+            {% endif %}
+            <p class="text-muted mb-2"><strong>Дата:</strong> {{ opinion.created_at|date:"d.m.Y" }}</p>
+            {% if opinion.tags.all %}
+            <div class="mb-3">
+                {% for tag in opinion.tags.all %}
+                <span class="badge bg-secondary">{{ tag.name }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <hr>
+            <div class="text-body">{{ opinion.text|linebreaks }}</div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        {% if opinion.related_norms.exists %}
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent fw-semibold">Нормы права</div>
+                <ul class="list-group list-group-flush">
+                    {% for norm in opinion.related_norms.all %}
+                    <li class="list-group-item">
+                        <a href="{% url 'knowledge:norm_detail' norm.pk %}">{{ norm.title }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        {% if opinion.related_cases.exists %}
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent fw-semibold">Судебная практика</div>
+                <ul class="list-group list-group-flush">
+                    {% for case in opinion.related_cases.all %}
+                    <li class="list-group-item">
+                        <a href="{% url 'knowledge:case_detail' case.pk %}">{{ case }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

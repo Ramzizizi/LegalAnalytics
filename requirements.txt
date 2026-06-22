@@ -1,0 +1,10 @@
+Django==5.1.*
+psycopg2-binary==2.9.*
+dj-database-url==2.*
+gunicorn==22.*
+whitenoise==6.*
+django-taggit==5.*
+django-filter==24.*
+docxtpl==0.16.*
+pytest==8.*
+pytest-django==4.*

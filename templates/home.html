@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная — База правовой аналитики{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3">База правовой аналитики</h1>
+            <p class="text-muted">Нормы права, судебная практика и правовые заключения</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'search:search' %}" class="btn btn-primary">
+                <i class="bi bi-search"></i> Найти материалы
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card text-center border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="display-4 text-primary mb-2"><i class="bi bi-file-text"></i></div>
+                    <h2 class="h1 fw-bold">{{ norm_count }}</h2>
+                    <p class="text-muted mb-0">Норм права</p>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a href="{% url 'search:search' %}?type=norm" class="btn btn-sm btn-outline-primary">Смотреть</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="display-4 text-success mb-2"><i class="bi bi-bank"></i></div>
+                    <h2 class="h1 fw-bold">{{ case_count }}</h2>
+                    <p class="text-muted mb-0">Решений судов</p>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a href="{% url 'search:search' %}?type=case" class="btn btn-sm btn-outline-success">Смотреть</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="display-4 text-warning mb-2"><i class="bi bi-journal-check"></i></div>
+                    <h2 class="h1 fw-bold">{{ opinion_count }}</h2>
+                    <p class="text-muted mb-0">Правовых заключений</p>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a href="{% url 'search:search' %}?type=opinion" class="btn btn-sm btn-outline-warning">Смотреть</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-file-earmark-text text-primary"></i> Конструктор заключений</h5>
+                    <p class="card-text text-muted">Подберите нормы и практику, составьте правовое заключение и выгрузите в Word.</p>
+                    <a href="{% url 'builder:home' %}" class="btn btn-outline-primary btn-sm">Открыть конструктор</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-bar-chart text-success"></i> Дашборд аналитики</h5>
+                    <p class="card-text text-muted">Распределение материалов по отраслям права, динамика и топ-теги.</p>
+                    <a href="{% url 'analytics:dashboard' %}" class="btn btn-outline-success btn-sm">Открыть дашборд</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ case.case_number }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 860px;">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'catalog:home' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'search:search' %}">Поиск</a></li>
+            <li class="breadcrumb-item active">Судебная практика</li>
+        </ol>
+    </nav>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <span class="badge bg-success mb-2">Судебная практика</span>
+            <h1 class="h4">{{ case.thesis }}</h1>
+            <p class="text-muted mb-1"><strong>Номер дела:</strong> {{ case.case_number }}</p>
+            <p class="text-muted mb-1"><strong>Суд:</strong> {{ case.court }}</p>
+            <p class="text-muted mb-1"><strong>Дата решения:</strong> {{ case.decision_date|date:"d.m.Y" }}</p>
+            {% if case.branch %}
+            <p class="text-muted mb-2"><strong>Отрасль права:</strong> {{ case.branch }}</p>
+            {% endif %}
+            {% if case.tags.all %}
+            <div class="mb-3">
+                {% for tag in case.tags.all %}
+                <span class="badge bg-secondary">{{ tag.name }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% if case.text %}
+            <hr>
+            <div class="text-body">{{ case.text|linebreaks }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if case.related_norms.exists %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent fw-semibold">Связанные нормы права</div>
+        <ul class="list-group list-group-flush">
+            {% for norm in case.related_norms.all %}
+            <li class="list-group-item">
+                <a href="{% url 'knowledge:norm_detail' norm.pk %}">{{ norm.title }}</a>
+                <span class="badge bg-primary ms-2">{{ norm.get_norm_type_display }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
