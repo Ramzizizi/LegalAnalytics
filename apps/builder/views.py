@@ -1,7 +1,9 @@
 from io import BytesIO
+from urllib.parse import quote
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import analyst_required
@@ -40,7 +42,9 @@ def basket_add(request, model_type, pk):
             basket['cases'].append(pk)
             _save_basket(request, basket)
 
-    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER', '/')
+    next_url = request.POST.get('next') or '/'
+    if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        next_url = '/'
     return redirect(next_url)
 
 
@@ -90,7 +94,6 @@ def export_docx(request):
     doc.save(buf)
     buf.seek(0)
 
-    from urllib.parse import quote
     safe_name = ''.join(c for c in title if c.isalnum() or c in ' _-')[:50].strip() or 'zaklyuchenie'
     encoded_name = quote(f'{safe_name}.docx', safe='')
     response = HttpResponse(
