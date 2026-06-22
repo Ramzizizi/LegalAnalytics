@@ -16,4 +16,6 @@ RUN useradd -m appuser && \
     chown -R appuser:appuser /app
 USER appuser
 
+RUN python manage.py collectstatic --noinput --skip-checks
+
 EXPOSE 8000

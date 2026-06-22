@@ -20,10 +20,8 @@ services:
              (python manage.py loaddata fixtures/initial_groups.json || true) &&
              (python manage.py createsuperuser --noinput || true) &&
              (python manage.py load_legal_data || true) &&
-             python manage.py collectstatic --noinput &&
              gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2"
     volumes:
-      - static_data:/app/staticfiles
       - media_data:/app/media
     ports:
       - "8000:8000"
@@ -35,5 +33,4 @@ services:
 
 volumes:
   postgres_data:
-  static_data:
   media_data:
