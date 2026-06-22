@@ -13,28 +13,33 @@
 
     <div class="d-flex flex-column gap-2">
         {% for case in page %}
-        <a href="{% url 'knowledge:case_detail' case.pk %}" class="text-decoration-none">
-            <div class="card border-0 shadow-sm card-hover">
-                <div class="card-body py-3 px-3">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1 me-2">
-                            <div class="mb-1">
-                                <span class="badge bg-success">{{ case.case_number }}</span>
-                                {% if case.branch %}
-                                <span class="badge bg-light text-dark border ms-1 fw-normal">{{ case.branch }}</span>
-                                {% endif %}
-                            </div>
-                            <div class="fw-semibold text-dark">{{ case.thesis }}</div>
-                            <small class="text-muted">{{ case.court }}</small>
+        <div class="card border-0 shadow-sm card-hover">
+            <div class="card-body py-3 px-3">
+                <div class="d-flex justify-content-between align-items-start">
+                    <a href="{% url 'knowledge:case_detail' case.pk %}" class="flex-grow-1 text-decoration-none me-2">
+                        <div class="mb-1">
+                            <span class="badge bg-success">{{ case.case_number }}</span>
+                            {% if case.branch %}
+                            <span class="badge bg-light text-dark border ms-1 fw-normal">{{ case.branch }}</span>
+                            {% endif %}
                         </div>
-                        <div class="text-end flex-shrink-0">
-                            <small class="text-muted d-block">{{ case.decision_date|date:"d.m.Y" }}</small>
-                            <i class="bi bi-chevron-right text-muted"></i>
-                        </div>
+                        <div class="fw-semibold text-dark">{{ case.thesis }}</div>
+                        <small class="text-muted">{{ case.court }}</small>
+                    </a>
+                    <div class="text-end flex-shrink-0 d-flex flex-column align-items-end gap-1">
+                        <small class="text-muted">{{ case.decision_date|date:"d.m.Y" }}</small>
+                        <form method="post" action="{% url 'builder:basket_add' 'case' case.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary py-0 px-1"
+                                    title="Добавить в конструктор">
+                                <i class="bi bi-plus-circle"></i>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
-        </a>
+        </div>
         {% empty %}
         <div class="text-center py-5 text-muted">
             <i class="bi bi-bank display-4"></i>

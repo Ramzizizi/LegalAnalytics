@@ -13,32 +13,37 @@
 
     <div class="d-flex flex-column gap-2">
         {% for norm in page %}
-        <a href="{% url 'knowledge:norm_detail' norm.pk %}" class="text-decoration-none">
-            <div class="card border-0 shadow-sm card-hover">
-                <div class="card-body py-3 px-3">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1 me-2">
-                            <div class="mb-1">
-                                <span class="badge bg-primary">{{ norm.get_norm_type_display }}</span>
-                                {% if norm.branch %}
-                                <span class="badge bg-light text-dark border ms-1 fw-normal">{{ norm.branch }}</span>
-                                {% endif %}
-                            </div>
-                            <div class="fw-semibold text-dark">{{ norm.title }}</div>
-                            {% if norm.article %}
-                            <small class="text-muted">{{ norm.article }}</small>
+        <div class="card border-0 shadow-sm card-hover">
+            <div class="card-body py-3 px-3">
+                <div class="d-flex justify-content-between align-items-start">
+                    <a href="{% url 'knowledge:norm_detail' norm.pk %}" class="flex-grow-1 text-decoration-none me-2">
+                        <div class="mb-1">
+                            <span class="badge bg-primary">{{ norm.get_norm_type_display }}</span>
+                            {% if norm.branch %}
+                            <span class="badge bg-light text-dark border ms-1 fw-normal">{{ norm.branch }}</span>
                             {% endif %}
                         </div>
-                        <div class="text-end flex-shrink-0">
-                            {% if norm.effective_date %}
-                            <small class="text-muted d-block">{{ norm.effective_date|date:"Y" }}</small>
-                            {% endif %}
-                            <i class="bi bi-chevron-right text-muted"></i>
-                        </div>
+                        <div class="fw-semibold text-dark">{{ norm.title }}</div>
+                        {% if norm.article %}
+                        <small class="text-muted">{{ norm.article }}</small>
+                        {% endif %}
+                    </a>
+                    <div class="text-end flex-shrink-0 d-flex flex-column align-items-end gap-1">
+                        {% if norm.effective_date %}
+                        <small class="text-muted">{{ norm.effective_date|date:"Y" }}</small>
+                        {% endif %}
+                        <form method="post" action="{% url 'builder:basket_add' 'norm' norm.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary py-0 px-1"
+                                    title="Добавить в конструктор">
+                                <i class="bi bi-plus-circle"></i>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
-        </a>
+        </div>
         {% empty %}
         <div class="text-center py-5 text-muted">
             <i class="bi bi-file-text display-4"></i>

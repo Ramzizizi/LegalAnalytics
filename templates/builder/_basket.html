@@ -1,0 +1,61 @@
+{% if norms or cases %}
+<div class="d-flex flex-column gap-2">
+
+    {% if norms %}
+    <div class="small fw-semibold text-muted text-uppercase mb-1">
+        <i class="bi bi-file-text text-primary me-1"></i>Нормы права ({{ norms|length }})
+    </div>
+    {% for norm in norms %}
+    <div class="d-flex align-items-start gap-2 border rounded p-2 bg-white">
+        <div class="flex-grow-1 small">
+            <div class="fw-semibold lh-sm">{{ norm.article|default:norm.title|truncatechars:60 }}</div>
+            <div class="text-muted">{{ norm.get_norm_type_display }}</div>
+        </div>
+        <form method="post"
+              action="{% url 'builder:basket_remove' 'norm' norm.pk %}"
+              hx-post="{% url 'builder:basket_remove' 'norm' norm.pk %}"
+              hx-target="#basket-body"
+              hx-swap="innerHTML">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger border-0 p-0 px-1"
+                    title="Убрать из корзины">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </form>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if cases %}
+    <div class="small fw-semibold text-muted text-uppercase mt-2 mb-1">
+        <i class="bi bi-bank text-success me-1"></i>Судебная практика ({{ cases|length }})
+    </div>
+    {% for case in cases %}
+    <div class="d-flex align-items-start gap-2 border rounded p-2 bg-white">
+        <div class="flex-grow-1 small">
+            <div class="fw-semibold lh-sm">{{ case.case_number }}</div>
+            <div class="text-muted">{{ case.thesis|truncatechars:60 }}</div>
+        </div>
+        <form method="post"
+              action="{% url 'builder:basket_remove' 'case' case.pk %}"
+              hx-post="{% url 'builder:basket_remove' 'case' case.pk %}"
+              hx-target="#basket-body"
+              hx-swap="innerHTML">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger border-0 p-0 px-1"
+                    title="Убрать из корзины">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </form>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+</div>
+{% else %}
+<div class="text-center py-4 text-muted small">
+    <i class="bi bi-basket display-6 d-block mb-2"></i>
+    Корзина пуста.<br>
+    Добавляйте нормы и практику<br>из списков или карточек.
+</div>
+{% endif %}

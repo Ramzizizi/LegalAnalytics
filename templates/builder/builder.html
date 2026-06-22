@@ -1,10 +1,107 @@
 {% extends 'base.html' %}
 
-{% block title %}Конструктор заключений{% endblock %}
+{% block title %}Конструктор заключения — Правовая аналитика{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h1 class="h4 mb-3">Конструктор правового заключения</h1>
-    <p class="text-muted">Конструктор будет доступен после настройки (Этап 7).</p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h4 mb-0">
+            <i class="bi bi-file-earmark-text text-primary me-2"></i>Конструктор правового заключения
+        </h1>
+        <div class="d-flex gap-2">
+            <a href="{% url 'knowledge:norm_list' %}" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-file-text me-1"></i>Нормы
+            </a>
+            <a href="{% url 'knowledge:case_list' %}" class="btn btn-sm btn-outline-success">
+                <i class="bi bi-bank me-1"></i>Практика
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Корзина материалов -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold">
+                        <i class="bi bi-basket me-1"></i>Материалы
+                        {% if norms or cases %}
+                        <span class="badge bg-primary ms-1">{{ norms|length|add:cases|length }}</span>
+                        {% endif %}
+                    </span>
+                    {% if norms or cases %}
+                    <form method="post" action="{% url 'builder:basket_clear' %}"
+                          hx-post="{% url 'builder:basket_clear' %}"
+                          hx-target="#basket-body"
+                          hx-swap="innerHTML">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash me-1"></i>Очистить
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                <div class="card-body" id="basket-body">
+                    {% include 'builder/_basket.html' %}
+                </div>
+                <div class="card-footer bg-transparent border-0 text-muted small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Открывайте карточки норм и практики и нажимайте «В конструктор»
+                </div>
+            </div>
+        </div>
+
+        <!-- Форма заключения -->
+        <div class="col-lg-8">
+            <form method="post" action="{% url 'builder:export' %}">
+                {% csrf_token %}
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-transparent fw-semibold">
+                        <i class="bi bi-pencil me-1"></i>Оформление заключения
+                    </div>
+                    <div class="card-body">
+
+                        <div class="mb-3">
+                            <label for="id_title" class="form-label fw-semibold">Тема заключения</label>
+                            <input type="text" name="title" id="id_title"
+                                   class="form-control"
+                                   placeholder="Например: Заключение по вопросу расторжения договора аренды"
+                                   maxlength="300">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_question" class="form-label fw-semibold">Правовой вопрос</label>
+                            <textarea name="question" id="id_question"
+                                      class="form-control" rows="3"
+                                      placeholder="Опишите поставленный правовой вопрос..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_conclusion" class="form-label fw-semibold">Текст заключения</label>
+                            <textarea name="conclusion" id="id_conclusion"
+                                      class="form-control" rows="10"
+                                      placeholder="Изложите правовую позицию, анализ норм и вывод..."></textarea>
+                            <div class="form-text">
+                                В документ будут включены выбранные нормы и практика из корзины.
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary px-4"
+                            {% if not norms and not cases %}
+                            title="Добавьте материалы в корзину"
+                            {% endif %}>
+                        <i class="bi bi-download me-2"></i>Скачать .docx
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
 </div>
 {% endblock %}
