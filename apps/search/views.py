@@ -201,7 +201,7 @@ def search(request):
     if query:
         # — нормы —
         if not record_type or record_type == 'norm':
-            norm_qs = _build_norm_qs(query, is_postgres).select_related('branch')
+            norm_qs = _build_norm_qs(query, is_postgres).select_related('branch').prefetch_related('tags')
             if branch_id:
                 norm_qs = norm_qs.filter(branch_id=branch_id)
             if tag_filter:
@@ -211,7 +211,7 @@ def search(request):
 
         # — практика —
         if not record_type or record_type == 'case':
-            case_qs = _build_case_qs(query, is_postgres).select_related('branch')
+            case_qs = _build_case_qs(query, is_postgres).select_related('branch').prefetch_related('tags')
             if branch_id:
                 case_qs = case_qs.filter(branch_id=branch_id)
             if tag_filter:
@@ -222,7 +222,7 @@ def search(request):
         # — заключения (branch-фильтр не применяется, нет поля branch) —
         if not record_type or record_type == 'opinion':
             if not branch_id:
-                opinion_qs = _build_opinion_qs(query, is_postgres)
+                opinion_qs = _build_opinion_qs(query, is_postgres).prefetch_related('tags')
                 if tag_filter:
                     opinion_qs = opinion_qs.filter(tags__name=tag_filter)
                 results += [_opinion_to_dict(o) for o in opinion_qs.order_by('-rank')[:30]]

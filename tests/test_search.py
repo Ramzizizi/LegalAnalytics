@@ -100,7 +100,8 @@ class TestFTSSearch:
         response = client.get(reverse('search:search') + '?q=исполнение&type=norm')
         content = response.content.decode()
         assert 'Норма права' in content
-        assert 'Судебная практика' not in content
+        # nav always has "Судебная практика" — check specifically for result-card badge
+        assert '<span class="badge bg-success">Судебная практика</span>' not in content
 
     def test_type_filter_case(self, client, user, norm, court_case):
         client.login(username=user.username, password='pass')

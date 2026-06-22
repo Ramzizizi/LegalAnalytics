@@ -38,7 +38,7 @@
     </form>
 
     <!-- Активные фильтры -->
-    {% if query and record_type or branch_id or tag_filter or date_from or date_to %}
+    {% if query or record_type or branch_id or tag_filter or date_from or date_to %}
     <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
         <span class="text-muted small">Фильтры:</span>
         {% if record_type %}
