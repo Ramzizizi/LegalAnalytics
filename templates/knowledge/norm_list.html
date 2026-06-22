@@ -32,6 +32,7 @@
                         {% if norm.effective_date %}
                         <small class="text-muted">{{ norm.effective_date|date:"Y" }}</small>
                         {% endif %}
+                        {% if is_analyst %}
                         <form method="post" action="{% url 'builder:basket_add' 'norm' norm.pk %}">
                             {% csrf_token %}
                             <input type="hidden" name="next" value="{{ request.get_full_path }}">
@@ -40,6 +41,7 @@
                                 <i class="bi bi-plus-circle"></i>
                             </button>
                         </form>
+                        {% endif %}
                     </div>
                 </div>
             </div>

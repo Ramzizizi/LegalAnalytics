@@ -1,8 +1,10 @@
 import json
+from django.contrib.auth.models import Group
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
+from apps.accounts.roles import ROLE_ANALYST
 from apps.catalog.models import LegalBranch
 from apps.knowledge.models import Norm, CourtCase, LegalOpinion
 
@@ -13,6 +15,8 @@ class TestDashboard(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username='analyst', password='p')
+        group, _ = Group.objects.get_or_create(name=ROLE_ANALYST)
+        self.user.groups.add(group)
         self.client.login(username='analyst', password='p')
 
         branch = LegalBranch.objects.create(name='Гражданское', slug='civil-a')

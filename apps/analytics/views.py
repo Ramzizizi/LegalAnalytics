@@ -1,15 +1,15 @@
 import json
 
 from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.db.models.functions import TruncYear
 
+from apps.accounts.decorators import analyst_required
 from apps.knowledge.models import Norm, CourtCase, LegalOpinion
 from apps.catalog.models import LegalBranch
 
 
-@login_required
+@analyst_required
 def dashboard(request):
     # ── KPI ──────────────────────────────────────────────────────────────────
     total_norms = Norm.objects.count()

@@ -1,10 +1,10 @@
 from io import BytesIO
 
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 
+from apps.accounts.decorators import analyst_required
 from apps.knowledge.models import Norm, CourtCase
 
 
@@ -17,7 +17,7 @@ def _save_basket(request, basket):
     request.session.modified = True
 
 
-@login_required
+@analyst_required
 def builder_home(request):
     basket = _get_basket(request)
     norms = Norm.objects.filter(pk__in=basket['norms']).select_related('branch')
@@ -25,7 +25,7 @@ def builder_home(request):
     return render(request, 'builder/builder.html', {'norms': norms, 'cases': cases})
 
 
-@login_required
+@analyst_required
 @require_POST
 def basket_add(request, model_type, pk):
     basket = _get_basket(request)
@@ -44,7 +44,7 @@ def basket_add(request, model_type, pk):
     return redirect(next_url)
 
 
-@login_required
+@analyst_required
 @require_POST
 def basket_remove(request, model_type, pk):
     basket = _get_basket(request)
@@ -62,7 +62,7 @@ def basket_remove(request, model_type, pk):
     return redirect('builder:home')
 
 
-@login_required
+@analyst_required
 @require_POST
 def basket_clear(request):
     request.session['basket'] = {'norms': [], 'cases': []}
@@ -73,7 +73,7 @@ def basket_clear(request):
     return redirect('builder:home')
 
 
-@login_required
+@analyst_required
 @require_POST
 def export_docx(request):
     basket = _get_basket(request)

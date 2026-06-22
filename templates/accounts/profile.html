@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Профиль — Правовая аналитика{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 600px;">
+    <h1 class="h4 mb-4"><i class="bi bi-person-circle me-2"></i>Профиль пользователя</h1>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold"
+                     style="width:56px;height:56px;font-size:1.4rem;">
+                    {{ user.username|first|upper }}
+                </div>
+                <div>
+                    <div class="fw-semibold fs-5">
+                        {{ user.get_full_name|default:user.username }}
+                    </div>
+                    {% if user.get_full_name %}
+                    <div class="text-muted small">@{{ user.username }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <dl class="row mb-0">
+                <dt class="col-sm-4 text-muted fw-normal">Роль</dt>
+                <dd class="col-sm-8">
+                    {% if role_label %}
+                    <span class="badge
+                        {% if is_editor %}bg-danger
+                        {% elif is_analyst %}bg-primary
+                        {% else %}bg-secondary
+                        {% endif %}">
+                        {{ role_label }}
+                    </span>
+                    {% else %}
+                    <span class="text-muted small">Не назначена</span>
+                    {% endif %}
+                </dd>
+
+                {% if user.email %}
+                <dt class="col-sm-4 text-muted fw-normal">Email</dt>
+                <dd class="col-sm-8">{{ user.email }}</dd>
+                {% endif %}
+
+                <dt class="col-sm-4 text-muted fw-normal">Заключений создано</dt>
+                <dd class="col-sm-8">{{ opinions_count }}</dd>
+
+                <dt class="col-sm-4 text-muted fw-normal">Дата регистрации</dt>
+                <dd class="col-sm-8">{{ user.date_joined|date:"d.m.Y" }}</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a href="{% url 'search:search' %}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-search me-1"></i>Поиск
+        </a>
+        {% if is_analyst %}
+        <a href="{% url 'builder:home' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-file-earmark-text me-1"></i>Конструктор
+        </a>
+        <a href="{% url 'analytics:dashboard' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-bar-chart me-1"></i>Аналитика
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
