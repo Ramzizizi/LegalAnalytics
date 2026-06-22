@@ -118,7 +118,7 @@
                         Отрасль права
                     </div>
                     <div class="list-group list-group-flush small">
-                        {% for (bid, bname), cnt in branch_facets %}
+                        {% for bid, bname, cnt in branch_facets %}
                         <a href="?q={{ query }}&branch={{ bid }}{% if record_type %}&type={{ record_type }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
                            class="list-group-item list-group-item-action py-2 d-flex justify-content-between
                                   {% if branch_id == bid|stringformat:'s' %}fw-semibold{% endif %}"

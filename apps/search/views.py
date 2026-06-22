@@ -126,7 +126,8 @@ def _get_branch_facets(query, is_postgres):
     for row in case_rows:
         counts[(row['branch__id'], row['branch__name'])] += row['n']
 
-    return sorted(counts.items(), key=lambda x: -x[1])
+    # Возвращаем плоские кортежи (branch_id, branch_name, count)
+    return [(bid, bname, cnt) for (bid, bname), cnt in sorted(counts.items(), key=lambda x: -x[1])]
 
 
 def _get_tag_facets(results):
