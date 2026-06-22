@@ -3,79 +3,196 @@
 {% block title %}Поиск{% if query %} — {{ query }}{% endif %} — Правовая аналитика{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
+<div class="container-fluid px-3">
+    <!-- Поисковая строка -->
+    <form method="get" action="{% url 'search:search' %}"
+          id="search-form"
+          hx-get="{% url 'search:search' %}"
+          hx-target="#results-area"
+          hx-push-url="true"
+          hx-indicator="#search-spinner"
+          hx-trigger="submit">
+        <div class="input-group input-group-lg mb-3 shadow-sm">
+            <input type="text" name="q" value="{{ query }}" id="search-input"
+                   class="form-control border-end-0"
+                   placeholder="Введите запрос (договор аренды, неустойка, алименты…)"
+                   autocomplete="off">
+            <span class="input-group-text bg-white border-start-0 text-muted" id="search-spinner"
+                  style="display:none;">
+                <span class="spinner-border spinner-border-sm"></span>
+            </span>
+            <button class="btn btn-primary px-4" type="submit">
+                <i class="bi bi-search"></i> Найти
+            </button>
+            {% if query %}
+            <a href="{% url 'search:search' %}" class="btn btn-outline-secondary" title="Сбросить">
+                <i class="bi bi-x-lg"></i>
+            </a>
+            {% endif %}
+        </div>
 
-        <!-- Фильтры (боковая панель) -->
-        <div class="col-md-3 col-lg-2 mb-4">
-            <div class="card border-0 shadow-sm sticky-top" style="top: 1rem;">
-                <div class="card-header bg-transparent fw-semibold">Тип материала</div>
-                <div class="list-group list-group-flush" id="type-filter">
-                    {% with base_url="?q="|add:query %}
-                    <a href="{{ base_url }}"
-                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center
-                              {% if not record_type %}active{% endif %}"
-                       hx-get="{% url 'search:search' %}?q={{ query }}"
-                       hx-target="#results-area" hx-push-url="true">
-                        Все типы
-                    </a>
-                    <a href="{{ base_url }}&type=norm"
-                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center
-                              {% if record_type == 'norm' %}active{% endif %}"
-                       hx-get="{% url 'search:search' %}?q={{ query }}&type=norm"
-                       hx-target="#results-area" hx-push-url="true">
-                        <span>Нормы права</span>
-                        <span class="badge bg-primary rounded-pill">НПА</span>
-                    </a>
-                    <a href="{{ base_url }}&type=case"
-                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center
-                              {% if record_type == 'case' %}active{% endif %}"
-                       hx-get="{% url 'search:search' %}?q={{ query }}&type=case"
-                       hx-target="#results-area" hx-push-url="true">
-                        <span>Судебная практика</span>
-                        <span class="badge bg-success rounded-pill">СУД</span>
-                    </a>
-                    <a href="{{ base_url }}&type=opinion"
-                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center
-                              {% if record_type == 'opinion' %}active{% endif %}"
-                       hx-get="{% url 'search:search' %}?q={{ query }}&type=opinion"
-                       hx-target="#results-area" hx-push-url="true">
-                        <span>Заключения</span>
-                        <span class="badge bg-warning text-dark rounded-pill">ЗАК</span>
-                    </a>
-                    {% endwith %}
+        <!-- Скрытые поля сохраняют активные фильтры при отправке формы -->
+        {% if record_type %}<input type="hidden" name="type" value="{{ record_type }}">{% endif %}
+        {% if branch_id %}<input type="hidden" name="branch" value="{{ branch_id }}">{% endif %}
+        {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
+    </form>
+
+    <!-- Активные фильтры -->
+    {% if query and record_type or branch_id or tag_filter or date_from or date_to %}
+    <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+        <span class="text-muted small">Фильтры:</span>
+        {% if record_type %}
+        <a href="?q={{ query }}{% if branch_id %}&branch={{ branch_id }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
+           class="badge bg-primary text-decoration-none"
+           hx-get="?q={{ query }}{% if branch_id %}&branch={{ branch_id }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
+           hx-target="#results-area" hx-push-url="true">
+            {% if record_type == 'norm' %}Нормы права
+            {% elif record_type == 'case' %}Судебная практика
+            {% elif record_type == 'opinion' %}Заключения{% endif %}
+            <i class="bi bi-x ms-1"></i>
+        </a>
+        {% endif %}
+        {% if active_branch %}
+        <a href="?q={{ query }}{% if record_type %}&type={{ record_type }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
+           class="badge bg-secondary text-decoration-none"
+           hx-get="?q={{ query }}{% if record_type %}&type={{ record_type }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
+           hx-target="#results-area" hx-push-url="true">
+            {{ active_branch.name }} <i class="bi bi-x ms-1"></i>
+        </a>
+        {% endif %}
+        {% if tag_filter %}
+        <a href="?q={{ query }}{% if record_type %}&type={{ record_type }}{% endif %}{% if branch_id %}&branch={{ branch_id }}{% endif %}"
+           class="badge bg-info text-dark text-decoration-none"
+           hx-get="?q={{ query }}{% if record_type %}&type={{ record_type }}{% endif %}{% if branch_id %}&branch={{ branch_id }}{% endif %}"
+           hx-target="#results-area" hx-push-url="true">
+            #{{ tag_filter }} <i class="bi bi-x ms-1"></i>
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="row g-3">
+        <!-- Боковая панель фасетов -->
+        <div class="col-md-3 col-xl-2">
+            <div class="sticky-top" style="top: 1rem;">
+
+                <!-- Тип материала -->
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-transparent fw-semibold py-2 small text-uppercase text-muted">
+                        Тип материала
+                    </div>
+                    <div class="list-group list-group-flush small">
+                        {% with base="?q="|add:query %}
+                        <a href="{{ base }}{% if branch_id %}&branch={{ branch_id }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
+                           class="list-group-item list-group-item-action py-2 {% if not record_type %}fw-semibold{% endif %}"
+                           hx-get="{{ base }}{% if branch_id %}&branch={{ branch_id }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
+                           hx-target="#results-area" hx-push-url="true">
+                            <i class="bi bi-grid me-1"></i> Все типы
+                        </a>
+                        <a href="{{ base }}&type=norm{% if branch_id %}&branch={{ branch_id }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
+                           class="list-group-item list-group-item-action py-2 {% if record_type == 'norm' %}fw-semibold text-primary{% endif %}"
+                           hx-get="{{ base }}&type=norm{% if branch_id %}&branch={{ branch_id }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
+                           hx-target="#results-area" hx-push-url="true">
+                            <span class="badge bg-primary me-1">НПА</span> Нормы права
+                        </a>
+                        <a href="{{ base }}&type=case{% if branch_id %}&branch={{ branch_id }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
+                           class="list-group-item list-group-item-action py-2 {% if record_type == 'case' %}fw-semibold text-success{% endif %}"
+                           hx-get="{{ base }}&type=case{% if branch_id %}&branch={{ branch_id }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
+                           hx-target="#results-area" hx-push-url="true">
+                            <span class="badge bg-success me-1">СУД</span> Практика
+                        </a>
+                        <a href="{{ base }}&type=opinion{% if branch_id %}&branch={{ branch_id }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
+                           class="list-group-item list-group-item-action py-2 {% if record_type == 'opinion' %}fw-semibold text-warning{% endif %}"
+                           hx-get="{{ base }}&type=opinion{% if branch_id %}&branch={{ branch_id }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
+                           hx-target="#results-area" hx-push-url="true">
+                            <span class="badge bg-warning text-dark me-1">ЗАК</span> Заключения
+                        </a>
+                        {% endwith %}
+                    </div>
                 </div>
+
+                <!-- Отрасль права (с счётчиками) -->
+                {% if branch_facets %}
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-transparent fw-semibold py-2 small text-uppercase text-muted">
+                        Отрасль права
+                    </div>
+                    <div class="list-group list-group-flush small">
+                        {% for (bid, bname), cnt in branch_facets %}
+                        <a href="?q={{ query }}&branch={{ bid }}{% if record_type %}&type={{ record_type }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
+                           class="list-group-item list-group-item-action py-2 d-flex justify-content-between
+                                  {% if branch_id == bid|stringformat:'s' %}fw-semibold{% endif %}"
+                           hx-get="?q={{ query }}&branch={{ bid }}{% if record_type %}&type={{ record_type }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
+                           hx-target="#results-area" hx-push-url="true">
+                            <span>{{ bname }}</span>
+                            <span class="badge bg-light text-dark border">{{ cnt }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Теги -->
+                {% if tag_facets %}
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-transparent fw-semibold py-2 small text-uppercase text-muted">
+                        Теги
+                    </div>
+                    <div class="card-body py-2">
+                        {% for tname, cnt in tag_facets %}
+                        <a href="?q={{ query }}&tag={{ tname }}{% if record_type %}&type={{ record_type }}{% endif %}{% if branch_id %}&branch={{ branch_id }}{% endif %}"
+                           class="badge {% if tag_filter == tname %}bg-info text-dark{% else %}bg-light text-dark border{% endif %} text-decoration-none me-1 mb-1"
+                           hx-get="?q={{ query }}&tag={{ tname }}{% if record_type %}&type={{ record_type }}{% endif %}{% if branch_id %}&branch={{ branch_id }}{% endif %}"
+                           hx-target="#results-area" hx-push-url="true">
+                            {{ tname }}
+                            <span class="ms-1 opacity-75">{{ cnt }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Диапазон дат -->
+                {% if query %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent fw-semibold py-2 small text-uppercase text-muted">
+                        Дата
+                    </div>
+                    <div class="card-body py-2">
+                        <form method="get" action="{% url 'search:search' %}"
+                              hx-get="{% url 'search:search' %}"
+                              hx-target="#results-area" hx-push-url="true">
+                            <input type="hidden" name="q" value="{{ query }}">
+                            {% if record_type %}<input type="hidden" name="type" value="{{ record_type }}">{% endif %}
+                            {% if branch_id %}<input type="hidden" name="branch" value="{{ branch_id }}">{% endif %}
+                            {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
+                            <label class="form-label small text-muted mb-1">С</label>
+                            <input type="date" name="date_from" value="{{ date_from }}"
+                                   class="form-control form-control-sm mb-2">
+                            <label class="form-label small text-muted mb-1">По</label>
+                            <input type="date" name="date_to" value="{{ date_to }}"
+                                   class="form-control form-control-sm mb-2">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm w-100">
+                                Применить
+                            </button>
+                            {% if date_from or date_to %}
+                            <a href="?q={{ query }}{% if record_type %}&type={{ record_type }}{% endif %}{% if branch_id %}&branch={{ branch_id }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
+                               class="btn btn-link btn-sm w-100 mt-1 text-muted"
+                               hx-get="?q={{ query }}{% if record_type %}&type={{ record_type }}{% endif %}{% if branch_id %}&branch={{ branch_id }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
+                               hx-target="#results-area" hx-push-url="true">
+                                Сбросить дату
+                            </a>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+
             </div>
         </div>
 
-        <!-- Основной контент -->
-        <div class="col-md-9 col-lg-10">
-            <!-- Строка поиска -->
-            <form method="get" action="{% url 'search:search' %}"
-                  hx-get="{% url 'search:search' %}"
-                  hx-target="#results-area"
-                  hx-push-url="true"
-                  hx-trigger="submit">
-                {% if record_type %}
-                <input type="hidden" name="type" value="{{ record_type }}">
-                {% endif %}
-                <div class="input-group input-group-lg mb-3 shadow-sm">
-                    <input type="text" name="q" value="{{ query }}" id="search-input"
-                           class="form-control border-0"
-                           placeholder="Введите запрос (например: договор аренды, неустойка)"
-                           autocomplete="off">
-                    <button class="btn btn-primary px-4" type="submit">
-                        <i class="bi bi-search"></i> Найти
-                    </button>
-                    {% if query %}
-                    <a href="{% url 'search:search' %}" class="btn btn-outline-secondary">
-                        <i class="bi bi-x-lg"></i>
-                    </a>
-                    {% endif %}
-                </div>
-            </form>
-
-            <!-- Результаты -->
+        <!-- Результаты -->
+        <div class="col-md-9 col-xl-10">
             <div id="results-area">
                 {% include 'search/results_partial.html' %}
             </div>

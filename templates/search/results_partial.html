@@ -1,51 +1,78 @@
 {% if query %}
     {% if results %}
-    <p class="text-muted small mb-3">
-        Найдено результатов: <strong>{{ total }}</strong> по запросу «{{ query }}»
-    </p>
-    <div class="list-group list-group-flush gap-2">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <p class="text-muted small mb-0">
+            Найдено: <strong>{{ total }}</strong> по запросу «{{ query }}»
+        </p>
+    </div>
+
+    <div class="d-flex flex-column gap-2">
         {% for item in results %}
-        <a href="{{ item.url }}"
-           class="list-group-item list-group-item-action border rounded shadow-sm mb-2 p-3">
-            <div class="d-flex justify-content-between align-items-start">
-                <div class="flex-grow-1 me-2">
-                    <div class="mb-1">
-                        <span class="badge bg-{{ item.type_color }} me-1">{{ item.type_label }}</span>
-                        {% if item.branch %}
-                        <span class="badge bg-light text-dark border">{{ item.branch }}</span>
-                        {% endif %}
+        <a href="{{ item.url }}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm card-hover">
+                <div class="card-body py-3 px-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1 me-2">
+                            <div class="mb-1">
+                                <span class="badge bg-{{ item.type_color }}">{{ item.type_label }}</span>
+                                {% if item.branch %}
+                                <span class="badge bg-light text-dark border ms-1 fw-normal">{{ item.branch }}</span>
+                                {% endif %}
+                            </div>
+                            <h6 class="mb-1 text-dark fw-semibold lh-sm">{{ item.title }}</h6>
+                            {% if item.subtitle %}
+                            <small class="text-muted d-block mb-1">{{ item.subtitle }}</small>
+                            {% endif %}
+                            {% if item.snippet %}
+                            <p class="mb-1 small text-secondary">{{ item.snippet|safe }}</p>
+                            {% endif %}
+                            {% if item.tags %}
+                            <div class="mt-1">
+                                {% for tag in item.tags %}
+                                <span class="badge bg-light text-secondary border fw-normal small">{{ tag }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <i class="bi bi-chevron-right text-muted flex-shrink-0 mt-1"></i>
                     </div>
-                    <h6 class="mb-1 fw-semibold">{{ item.title }}</h6>
-                    {% if item.subtitle %}
-                    <small class="text-muted">{{ item.subtitle }}</small>
-                    {% endif %}
-                    {% if item.snippet %}
-                    <p class="mb-1 mt-2 text-body small">{{ item.snippet|safe }}</p>
-                    {% endif %}
-                    {% if item.tags %}
-                    <div class="mt-1">
-                        {% for tag in item.tags %}
-                        <span class="badge bg-secondary fw-normal">{{ tag }}</span>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
                 </div>
-                <i class="bi bi-chevron-right text-muted mt-1"></i>
             </div>
         </a>
         {% endfor %}
     </div>
+
     {% else %}
     <div class="text-center py-5">
         <i class="bi bi-search display-4 text-muted"></i>
-        <h5 class="mt-3 text-muted">По запросу «{{ query }}» ничего не найдено</h5>
-        <p class="text-muted small">Попробуйте изменить запрос или убрать фильтр по типу</p>
+        <h5 class="mt-3 text-muted">Ничего не найдено по запросу «{{ query }}»</h5>
+        <p class="text-muted small">
+            Попробуйте изменить запрос{% if record_type or branch_id or tag_filter %} или убрать фильтры{% endif %}
+        </p>
+        {% if record_type or branch_id or tag_filter %}
+        <a href="?q={{ query }}" class="btn btn-outline-secondary btn-sm"
+           hx-get="?q={{ query }}" hx-target="#results-area" hx-push-url="true">
+            <i class="bi bi-x-circle me-1"></i> Сбросить все фильтры
+        </a>
+        {% endif %}
     </div>
     {% endif %}
 {% else %}
 <div class="text-center py-5 text-muted">
     <i class="bi bi-search display-4"></i>
-    <p class="mt-3">Введите запрос для поиска по нормам, судебной практике и заключениям</p>
+    <p class="mt-3 fs-6">Введите запрос для поиска по нормам, судебной практике и заключениям</p>
     <p class="small">Поддерживается полнотекстовый поиск с учётом словоформ русского языка</p>
+    <div class="mt-3 d-flex flex-wrap justify-content-center gap-2">
+        <a href="?q=договор" class="badge bg-light text-dark border text-decoration-none p-2"
+           hx-get="?q=договор" hx-target="#results-area" hx-push-url="true">договор</a>
+        <a href="?q=неустойка" class="badge bg-light text-dark border text-decoration-none p-2"
+           hx-get="?q=неустойка" hx-target="#results-area" hx-push-url="true">неустойка</a>
+        <a href="?q=алименты" class="badge bg-light text-dark border text-decoration-none p-2"
+           hx-get="?q=алименты" hx-target="#results-area" hx-push-url="true">алименты</a>
+        <a href="?q=увольнение" class="badge bg-light text-dark border text-decoration-none p-2"
+           hx-get="?q=увольнение" hx-target="#results-area" hx-push-url="true">увольнение</a>
+        <a href="?q=налог" class="badge bg-light text-dark border text-decoration-none p-2"
+           hx-get="?q=налог" hx-target="#results-area" hx-push-url="true">налог</a>
+    </div>
 </div>
 {% endif %}
